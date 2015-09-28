@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+    <strong id="server"></strong>
+
+    <form id="form">
+        <input disabled type="text" id="userId" placeholder="User ID">
+        <button disabled type="submit" id="auth">Authenticate</button>
+    </form>
+
+    <ul id="messages" hidden>
+        <li>None yet.</li>
+    </ul>
+
+    <script>
+        var SERVER_COUNT = 4;
+
+        var userId;
+        var serverId = Math.floor(Math.random() * SERVER_COUNT) + 1;
+        var socket = new WebSocket('ws://localhost:2550' + serverId);
+
+        document.getElementById('server').textContent = 'Server #' + serverId;
+
+        var $userId = document.getElementById('userId');
+        var $auth = document.getElementById('auth');
+        var $messages = document.getElementById('messages');
+        var $form = document.getElementById('form');
+
+        socket.addEventListener('open', function () {
+            $auth.disabled = $userId.disabled = false;
+            $form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                authenticateUser();
+            });
+        });
+
+        socket.addEventListener('message', function (event) {
+            var payload = JSON.parse(event.data);
+
+            switch (payload.type) {
+                case 'auth-callback':
+                    handleAuthCallback(payload);
+                    break;
+                case 'message':
+                    handleNotifyMessage(payload);
+                    break;
+            }
+        });
+
+        function handleNotifyMessage (payload) {
+            var $li = document.createElement('li');
+            $li.textContent = '[' + (new Date()) + '] ' + payload.message;
+            $messages.appendChild($li);
+        }
+
+        function handleAuthCallback (payload) {
+            $messages.hidden = false;
+        }
+
+        function authenticateUser () {
+            if (userId = $userId.value) {
+                socket.send(JSON.stringify({
+                    type: 'auth',
+                    userId: userId
+                }));
+
+                $auth.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>
