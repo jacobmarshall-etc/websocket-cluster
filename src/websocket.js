@@ -3,7 +3,6 @@ const redis = require('redis');
 
 var cache = redis.createClient();
 var server = new Server({ port: process.env.PORT });
-var serverId = process.env.ID;
 var userIds = [];
 var userListeners = [];
 var userListenerIds = {};

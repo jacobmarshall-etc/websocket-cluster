@@ -14,10 +14,7 @@ app.get('/notify/:userId', function (req, res) {
     });
 
     cache.publish('user.' + userId, payload);
-
-    res.json({
-        result: 'OK'
-    });
+    res.json({ result: 'OK' });
 });
 
 app.listen(process.env.PORT);
